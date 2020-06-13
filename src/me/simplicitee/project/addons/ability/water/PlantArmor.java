@@ -325,7 +325,12 @@ public class PlantArmor extends PlantAbility implements AddonAbility, MultiAbili
 		
 		this.sources.clear();
 		this.shield.clear();
-		this.bar.removeAll();
+		try {
+			this.bar.removeAll();
+		}
+		catch (NullPointerException e) {
+			player.sendMessage("You do not have the knowledge for this move");
+		}
 	}
 	
 	private void reset() {

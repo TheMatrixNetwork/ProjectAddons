@@ -365,19 +365,19 @@ public class MainListener implements Listener {
 		if (entity instanceof Player) {
 			Player player = (Player) event.getEntity();
 			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-			
 			Dodging dodge = CoreAbility.getAbility(player, Dodging.class);
-				
-			if (dodge != null && bPlayer.canBendPassive(dodge) && bPlayer.isElementToggled(Element.CHI)) {
-				if (dodge.check()) {
-					event.setCancelled(true);
-					ActionBar.sendActionBar(ChatColor.LIGHT_PURPLE + "!> " + Element.CHI.getColor() + "Dodged" + ChatColor.LIGHT_PURPLE + " <!", player);
-					
-					if (damagerE instanceof Player) {
-						ActionBar.sendActionBar(ChatColor.LIGHT_PURPLE + "!> " + ChatColor.WHITE + player.getName() + Element.CHI.getColor() + " dodged" + ChatColor.LIGHT_PURPLE + " <!", (Player) damagerE);
+			if (bPlayer != null) {
+				if (dodge != null && bPlayer.canBendPassive(dodge) && bPlayer.isElementToggled(Element.CHI)) {
+					if (dodge.check()) {
+						event.setCancelled(true);
+						ActionBar.sendActionBar(ChatColor.LIGHT_PURPLE + "!> " + Element.CHI.getColor() + "Dodged" + ChatColor.LIGHT_PURPLE + " <!", player);
+						
+						if (damagerE instanceof Player) {
+							ActionBar.sendActionBar(ChatColor.LIGHT_PURPLE + "!> " + ChatColor.WHITE + player.getName() + Element.CHI.getColor() + " dodged" + ChatColor.LIGHT_PURPLE + " <!", (Player) damagerE);
+						}
+						
+						return;
 					}
-					
-					return;
 				}
 			}
 		}
@@ -680,7 +680,8 @@ public class MainListener implements Listener {
 	private boolean canBend(Player player, String ability, boolean canbend) {
 		BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
 		CoreAbility abil = CoreAbility.getAbility(ability);
-		
+		if (bPlayer == null)
+			return false;
 		if (abil == null) {
 			return false;
 		} else if (bPlayer.getBoundAbility() == null) {
