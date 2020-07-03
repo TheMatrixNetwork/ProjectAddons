@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
+import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.FireAbility;
@@ -49,7 +50,7 @@ public class FireDisc extends FireAbility implements AddonAbility{
 		this.drop = ProjectAddons.instance.getConfig().getBoolean("Abilities.Fire.FireDisc.DropCutBlocks");
 		this.cooldown = ProjectAddons.instance.getConfig().getLong("Abilities.Fire.FireDisc.Cooldown");
 		
-		if (player.hasPermission("bending.fire.bluefire")) {
+		if (bPlayer.hasSubElement(Element.BLUE_FIRE)) {
 			this.damage *= 1.5;
 		}
 		

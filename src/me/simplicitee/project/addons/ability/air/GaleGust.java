@@ -16,7 +16,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import com.projectkorra.projectkorra.object.HorizontalVelocityTracker;
+import com.projectkorra.projectkorra.object.VelocityTracker;
 import com.projectkorra.projectkorra.util.DamageHandler;
 
 import me.simplicitee.project.addons.ProjectAddons;
@@ -95,7 +95,7 @@ public class GaleGust extends AirAbility implements AddonAbility {
 			}
 			
 			e.setVelocity(direction.clone().multiply(knockback));
-			new HorizontalVelocityTracker(e, player, 0, this);
+			new VelocityTracker(player, this, true, false);
 			e.setFireTicks(0);
 		}
 		

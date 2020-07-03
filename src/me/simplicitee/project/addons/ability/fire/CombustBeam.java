@@ -16,7 +16,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import com.projectkorra.projectkorra.object.HorizontalVelocityTracker;
+import com.projectkorra.projectkorra.object.VelocityTracker;
 import com.projectkorra.projectkorra.util.ActionBar;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.ParticleEffect;
@@ -199,7 +199,7 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 					double knockback = power / (0.3 + e.getLocation().distance(curr));
 					Vector v = GeneralMethods.getDirection(curr, e.getLocation().add(0, 1, 0)).normalize().multiply(knockback);
 					e.setVelocity(v);
-					new HorizontalVelocityTracker(e, player, 4000, this);
+					new VelocityTracker(player, this, true, false);
 				}
 			}
 			
