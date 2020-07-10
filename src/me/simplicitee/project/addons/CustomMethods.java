@@ -31,7 +31,7 @@ public class CustomMethods {
 	public void playDynamicFireParticles(Player player, Location loc, int amount, double xOff, double yOff, double zOff) {
         Random r = new Random();
 		if (BendingPlayer.getBendingPlayer(player).hasSubElement(Element.BLUE_FIRE)) 
-        	ParticleEffect.SOUL_FLAME.display(loc, amount, xOff, yOff, zOff, 0.02);
+        	ParticleEffect.SOUL_FIRE_FLAME.display(loc, amount, xOff, yOff, zOff, 0.02);
 		else 
         	ParticleEffect.FLAME.display(loc, amount, xOff, yOff, zOff, 0.02);
 		
