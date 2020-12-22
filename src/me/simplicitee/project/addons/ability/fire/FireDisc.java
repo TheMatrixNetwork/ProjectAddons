@@ -9,18 +9,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.FireAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import com.projectkorra.projectkorra.avatar.AvatarState;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
 
 import me.simplicitee.project.addons.ProjectAddons;
 
-public class FireDisc extends FireAbility implements AddonAbility{
+public class FireDisc extends FireAbility implements AddonAbility {
 	
 	@Attribute(Attribute.DAMAGE)
 	private double damage;
@@ -32,6 +30,8 @@ public class FireDisc extends FireAbility implements AddonAbility{
 	private boolean control;
 	@Attribute(Attribute.COOLDOWN)
 	private long cooldown;
+	@Attribute(Attribute.KNOCKBACK)
+	private double knockback;
 
 	private boolean revert;
 	private double currRange = 0;
@@ -49,10 +49,7 @@ public class FireDisc extends FireAbility implements AddonAbility{
 		this.revert = ProjectAddons.instance.getConfig().getBoolean("Abilities.Fire.FireDisc.RevertCutBlocks");
 		this.drop = ProjectAddons.instance.getConfig().getBoolean("Abilities.Fire.FireDisc.DropCutBlocks");
 		this.cooldown = ProjectAddons.instance.getConfig().getLong("Abilities.Fire.FireDisc.Cooldown");
-		
-		if (bPlayer.hasSubElement(Element.BLUE_FIRE)) {
-			this.damage *= 1.5;
-		}
+		this.knockback = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.FireDisc.Knockback");
 		
 		if (bPlayer.isAvatarState()) {
 			this.control = true;
@@ -141,13 +138,14 @@ public class FireDisc extends FireAbility implements AddonAbility{
 		for (double r = 0; r < 1; r += 0.2) {
 			for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / (r * 12)) {
 				Vector ortho = GeneralMethods.getOrthogonalVector(normal, Math.toDegrees(theta), r);
-				ProjectAddons.instance.getMethods().playDynamicFireParticles(player, loc.clone().add(ortho), 2, 0.03, 0, 0.03);
+				playFirebendingParticles(loc.clone().add(ortho), 2, 0.03, 0, 0.03);
 			}
 		}
 		
 		for (Entity entity : GeneralMethods.getEntitiesAroundPoint(loc, 1.5)) {
 			if (entity instanceof LivingEntity && entity.getEntityId() != player.getEntityId()) {
 				DamageHandler.damageEntity(entity, player, damage, this);
+				entity.setVelocity(direction.clone().multiply(knockback));
 				remove();
 				return;
 			}

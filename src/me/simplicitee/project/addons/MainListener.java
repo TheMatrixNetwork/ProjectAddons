@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
@@ -27,6 +28,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffectType;
@@ -40,6 +42,7 @@ import com.projectkorra.projectkorra.ProjectKorra;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.util.ComboManager;
 import com.projectkorra.projectkorra.ability.util.MultiAbilityManager;
+import com.projectkorra.projectkorra.event.AbilityStartEvent;
 import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.event.PlayerBindChangeEvent;
 import com.projectkorra.projectkorra.event.PlayerChangeElementEvent;
@@ -49,6 +52,7 @@ import com.projectkorra.projectkorra.util.ActionBar;
 import com.projectkorra.projectkorra.util.ClickType;
 
 import me.simplicitee.project.addons.ability.air.Deafen;
+import me.simplicitee.project.addons.ability.air.FlightPassive;
 import me.simplicitee.project.addons.ability.air.GaleGust;
 import me.simplicitee.project.addons.ability.air.SonicWave;
 import me.simplicitee.project.addons.ability.air.VocalMimicry;
@@ -65,7 +69,6 @@ import me.simplicitee.project.addons.ability.earth.Bulwark;
 import me.simplicitee.project.addons.ability.earth.Crumble;
 import me.simplicitee.project.addons.ability.earth.Dig;
 import me.simplicitee.project.addons.ability.earth.EarthKick;
-import me.simplicitee.project.addons.ability.earth.Geoblast;
 import me.simplicitee.project.addons.ability.earth.LavaSurge;
 import me.simplicitee.project.addons.ability.earth.MagmaSlap;
 import me.simplicitee.project.addons.ability.earth.QuickWeld;
@@ -78,6 +81,7 @@ import me.simplicitee.project.addons.ability.fire.Electrify;
 import me.simplicitee.project.addons.ability.fire.Explode;
 import me.simplicitee.project.addons.ability.fire.FireDisc;
 import me.simplicitee.project.addons.ability.fire.Jets;
+import me.simplicitee.project.addons.ability.water.BloodGrip;
 import me.simplicitee.project.addons.ability.water.MistShards;
 import me.simplicitee.project.addons.ability.water.PlantArmor;
 import me.simplicitee.project.addons.ability.water.RazorLeaf;
@@ -117,9 +121,13 @@ public class MainListener implements Listener {
 		
 		if (ability == null) {
 			if (MultiAbilityManager.hasMultiAbilityBound(player)) {
-				if (MultiAbilityManager.getBoundMultiAbility(player).equalsIgnoreCase("PlantArmor")) {
+				String abil = MultiAbilityManager.getBoundMultiAbility(player);
+				if (abil.equalsIgnoreCase("PlantArmor")) {
 					ComboManager.addComboAbility(player, ClickType.LEFT_CLICK);
 					new PlantArmor(player, ClickType.LEFT_CLICK);
+				} else if (abil.equalsIgnoreCase("BloodGrip")) {
+					ComboManager.addComboAbility(player, ClickType.LEFT_CLICK);
+					new BloodGrip(player, false);
 				}
 			}
 			
@@ -160,10 +168,6 @@ public class MainListener implements Listener {
 			}
 		} else if (canBend(player, "Crumble")) {
 			new Crumble(player, ClickType.LEFT_CLICK);
-		} else if (canBend(player, "Geoblast", false)) {
-			if (CoreAbility.hasAbility(player, Geoblast.class)) {
-				CoreAbility.getAbility(player, Geoblast.class).launch();
-			}
 		} else if (canBend(player, "ArcSpark")) {
 			if (CoreAbility.hasAbility(player, ArcSpark.class)) {
 				CoreAbility.getAbility(player, ArcSpark.class).shoot();
@@ -255,8 +259,6 @@ public class MainListener implements Listener {
 			new Accretion(player);
 		} else if (canBend(player, "Crumble")) {
 			new Crumble(player, ClickType.SHIFT_UP);
-		} else if (canBend(player, "Geoblast")) {
-			new Geoblast(player);
 		} else if (canBend(player, "ArcSpark")) {
 			new ArcSpark(player);
 		} else if (canBend(player, "CombustBeam")) {
@@ -269,6 +271,17 @@ public class MainListener implements Listener {
 			new Deafen(player);
 		} else if (canBend(player, "ChargeBolt")) {
 			new ChargeBolt(player);
+		} else if (canBend(player, "BloodGrip")) {
+			new BloodGrip(player, true);
+		}
+	}
+	
+	@EventHandler
+	public void onAbilityStart(AbilityStartEvent event) {
+		if (BloodGrip.isBloodbent(event.getAbility().getPlayer())) {
+			event.setCancelled(!ProjectAddons.instance.getConfig().getStringList("Abilities.Water.BloodGrip.BasicAbilities").contains(event.getAbility().getName()));
+		} else if (CoreAbility.hasAbility(event.getAbility().getPlayer(), FlightPassive.class) && CoreAbility.getAbility(event.getAbility().getPlayer(), FlightPassive.class).isActive()) {
+			event.setCancelled(ProjectAddons.instance.getConfig().getStringList("Passives.Air.Flying.AbilityBlacklist").contains(event.getAbility().getName()));
 		}
 	}
 	
@@ -316,7 +329,7 @@ public class MainListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onDamage(EntityDamageEvent event) {
 		if (event.isCancelled()) return;
 		
@@ -355,7 +368,7 @@ public class MainListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onHitDamage(EntityDamageByEntityEvent event) {
 		if (event.isCancelled()) return;
 		
@@ -627,6 +640,25 @@ public class MainListener implements Listener {
 	}
 	
 	@EventHandler
+	public void onFlightToggle(PlayerToggleFlightEvent event) {
+		Player player = event.getPlayer();
+		if (!CoreAbility.hasAbility(player, FlightPassive.class)) {
+			return;
+		}
+		
+		FlightPassive passive = CoreAbility.getAbility(player, FlightPassive.class);
+		
+		if (player.getGameMode() == GameMode.CREATIVE && player.getGameMode() == GameMode.SPECTATOR) {
+			return;
+		} else if (player.getInventory().getContents().length != 0) {
+			event.setCancelled(true);
+			return;
+		}
+		
+		passive.fly(event.isFlying());
+	}
+	
+	@EventHandler
 	public void onOffhandToggle(PlayerSwapHandItemsEvent event) {
 		if (event.isCancelled()) {
 			return;
@@ -637,6 +669,14 @@ public class MainListener implements Listener {
 		
 		if (bPlayer == null) { 
 			return;
+		}
+		
+		if (CoreAbility.hasAbility(player, FlightPassive.class)) {
+			FlightPassive passive = CoreAbility.getAbility(player, FlightPassive.class);
+			if (passive.isActive()) {
+				passive.toggleGlide();
+				return;
+			}
 		}
 		
 		if (player.hasPermission("bending.offhandswap")) {

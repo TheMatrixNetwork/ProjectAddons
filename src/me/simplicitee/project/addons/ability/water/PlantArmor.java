@@ -256,9 +256,9 @@ public class PlantArmor extends PlantAbility implements AddonAbility, MultiAbili
 				bar.setColor(BarColor.GREEN);
 			}
 			
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 5, swim), true);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 5, speed), true);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 5, jump), true);
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 5, swim));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 5, speed));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 5, jump));
 
 			if (active != ArmorAbility.NONE && player.getInventory().getHeldItemSlot() != active.getSlot()) {
 				this.reset();
@@ -325,11 +325,8 @@ public class PlantArmor extends PlantAbility implements AddonAbility, MultiAbili
 		
 		this.sources.clear();
 		this.shield.clear();
-		try {
+		if (this.bar != null) {
 			this.bar.removeAll();
-		}
-		catch (NullPointerException e) {
-			player.sendMessage("You do not have the knowledge for this move");
 		}
 	}
 	
@@ -423,6 +420,11 @@ public class PlantArmor extends PlantAbility implements AddonAbility, MultiAbili
 			this.bar.setProgress((double) durability / maxDurability);
 			this.bar.addPlayer(player);
 			
+			return;
+		}
+		
+		if (!player.isSneaking()) {
+			remove();
 			return;
 		}
 		
