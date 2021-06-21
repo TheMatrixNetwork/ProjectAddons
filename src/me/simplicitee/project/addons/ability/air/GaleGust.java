@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.util.Vector;
 
+import com.projectkorra.projectkorra.Element.SubElement;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.AirAbility;
@@ -109,7 +110,12 @@ public class GaleGust extends AirAbility implements AddonAbility {
 			
 			for (int i = 0; i < 3; i++) {
 				Vector ortho = GeneralMethods.getOrthogonalVector(point.getLocation().getDirection(), 120 * i + point.getAngle(), point.getRadius());
-				playAirbendingParticles(point.getLocation().clone().add(ortho), 1, 0, 0, 0);
+				if (getBendingPlayer().canUseSubElement(SubElement.POLLUTED)) {
+					playPollutedAirbendingParticles(point.getLocation().clone().add(ortho), 1, 0, 0, 0);
+
+				} else {
+					playAirbendingParticles(point.getLocation().clone().add(ortho), 1, 0, 0, 0);
+				}
 			}
 			
 			point.setAngle(point.getAngle() + Math.random() * 60).setRadius(radi);

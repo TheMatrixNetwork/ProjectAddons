@@ -10,6 +10,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import com.projectkorra.projectkorra.Element.SubElement;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.AirAbility;
@@ -56,8 +57,12 @@ public class Zephyr extends AirAbility implements AddonAbility {
 		for (int i = 0; i < 6; i++) {
 			Vector ortho = GeneralMethods.getOrthogonalVector(new Vector(0, 1, 0), 60 * i + angle, radius + 0.5);
 			anim.add(ortho);
-			
-			playAirbendingParticles(anim, 1, 0, 0, 0);
+			if (getBendingPlayer().canUseSubElement(SubElement.POLLUTED)) {
+				playPollutedAirbendingParticles(anim, 1, 0, 0, 0);
+
+			} else {
+				playAirbendingParticles(anim, 1, 0, 0, 0);
+			}
 			
 			anim.subtract(ortho);
 		}
