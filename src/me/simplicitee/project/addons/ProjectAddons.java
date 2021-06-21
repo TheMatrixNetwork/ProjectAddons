@@ -30,7 +30,6 @@ public class ProjectAddons extends JavaPlugin {
 	
 	private Config config;
 	private BoardManager boards;
-	private CustomMethods methods;
 	private MainListener listener;
 	private Element soundElement;
 
@@ -60,7 +59,6 @@ public class ProjectAddons extends JavaPlugin {
 		}
 		
 		this.getCommand("projectaddons").setExecutor(new ProjectCommand());
-		this.methods = new CustomMethods(this);
 	}
 	
 	@Override
@@ -105,10 +103,6 @@ public class ProjectAddons extends JavaPlugin {
 	
 	public BoardManager getBoardManager() {
 		return boards;
-	}
-	
-	public CustomMethods getMethods() {
-		return methods;
 	}
 	
 	private void setupConfig() {
@@ -195,6 +189,7 @@ public class ProjectAddons extends JavaPlugin {
 		c.addDefault("Abilities.Earth.Bulwark.Cooldown", 6000);
 		c.addDefault("Abilities.Earth.Bulwark.Damage", 1);
 		c.addDefault("Abilities.Earth.Bulwark.ThrowSpeed", 0.94);
+		c.addDefault("Abilities.Earth.Bulwark.Height", 2);
 		
 		// Crumble
 		c.addDefault("Abilities.Earth.Crumble.Enabled", true);
@@ -281,9 +276,11 @@ public class ProjectAddons extends JavaPlugin {
 		c.addDefault("Abilities.Fire.CombustBeam.Minimum.Power", 0.6);
 		c.addDefault("Abilities.Fire.CombustBeam.Minimum.Angle", 0.2);
 		c.addDefault("Abilities.Fire.CombustBeam.Minimum.ChargeTime", 1000);
+		c.addDefault("Abilities.Fire.CombustBeam.Minimum.Damage", 2);
 		c.addDefault("Abilities.Fire.CombustBeam.Maximum.Power", 2.7);
 		c.addDefault("Abilities.Fire.CombustBeam.Maximum.Angle", 40);
 		c.addDefault("Abilities.Fire.CombustBeam.Maximum.ChargeTime", 5000);
+		c.addDefault("Abilities.Fire.CombustBeam.Maximum.Damage", 10);
 		c.addDefault("Abilities.Fire.CombustBeam.InterruptedDamage", 10);
 		c.addDefault("Abilities.Fire.CombustBeam.RevertTime", 13000);
 		
@@ -377,6 +374,7 @@ public class ProjectAddons extends JavaPlugin {
 		c.addDefault("Abilities.Water.RazorLeaf.Damage", 2);
 		c.addDefault("Abilities.Water.RazorLeaf.Radius", 0.7);
 		c.addDefault("Abilities.Water.RazorLeaf.Range", 24);
+		c.addDefault("Abilities.Water.RazorLeaf.MaxRecalls", 3);
 		c.addDefault("Abilities.Water.RazorLeaf.Particles", 300);
 		
 		// PlantArmor
@@ -395,6 +393,7 @@ public class ProjectAddons extends JavaPlugin {
 		c.addDefault("Abilities.Water.PlantArmor.SubAbilities.VineWhip.Cooldown", 2000);
 		c.addDefault("Abilities.Water.PlantArmor.SubAbilities.VineWhip.Damage", 2);
 		c.addDefault("Abilities.Water.PlantArmor.SubAbilities.VineWhip.Range", 18);
+		c.addDefault("Abilities.Water.PlantArmor.SubAbilities.VineWhip.Speed", 3);
 		
 		// PlantArmor - RazorLeaf
 		c.addDefault("Abilities.Water.PlantArmor.SubAbilities.RazorLeaf.Cost", 150);
@@ -465,6 +464,7 @@ public class ProjectAddons extends JavaPlugin {
 		c.addDefault("Abilities.Chi.NinjaStance.Cooldown", 0);
 		c.addDefault("Abilities.Chi.NinjaStance.Stealth.Duration", 5000);
 		c.addDefault("Abilities.Chi.NinjaStance.Stealth.ChargeTime", 2000);
+		c.addDefault("Abilities.Chi.NinjaStance.Stealth.Cooldown", 8000);
 		c.addDefault("Abilities.Chi.NinjaStance.SpeedAmplifier", 5);
 		c.addDefault("Abilities.Chi.NinjaStance.JumpAmplifier", 5);
 		c.addDefault("Abilities.Chi.NinjaStance.DamageModifier", 0.75);

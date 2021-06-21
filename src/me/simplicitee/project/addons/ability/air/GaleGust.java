@@ -53,7 +53,7 @@ public class GaleGust extends AirAbility implements AddonAbility {
 			current = GeneralMethods.getRightSide(player.getLocation().add(0, 1.2, 0), 0.55);
 		}
 		
-		this.direction = player.getEyeLocation().getDirection().normalize();
+		this.direction = player.getEyeLocation().getDirection();
 		this.points = new HashSet<>();
 		
 		bPlayer.addCooldown(this);
@@ -73,7 +73,7 @@ public class GaleGust extends AirAbility implements AddonAbility {
 		}
 		
 		if (player.isSneaking()) {
-			direction.add(player.getEyeLocation().getDirection()).normalize();
+			direction.add(player.getEyeLocation().getDirection()).normalize().multiply(knockback);
 		}
 		
 		current = current.add(direction);
@@ -83,7 +83,7 @@ public class GaleGust extends AirAbility implements AddonAbility {
 			return;
 		}
 		
-		points.add(new Point(current.clone().setDirection(direction)));
+		points.add(new Point(current.clone().setDirection(direction.clone().normalize())));
 		
 		for (Entity e : GeneralMethods.getEntitiesAroundPoint(current, radius)) {
 			if (e.getEntityId() == player.getEntityId()) {
@@ -94,7 +94,7 @@ public class GaleGust extends AirAbility implements AddonAbility {
 				DamageHandler.damageEntity(e, damage, this);
 			}
 			
-			e.setVelocity(direction.clone().multiply(knockback));
+			e.setVelocity(direction);
 			e.setFireTicks(0);
 		}
 		

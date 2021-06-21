@@ -16,6 +16,7 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
 
 import me.simplicitee.project.addons.ProjectAddons;
+import me.simplicitee.project.addons.Util;
 
 public class RazorLeaf extends PlantAbility implements AddonAbility {
 	
@@ -29,9 +30,10 @@ public class RazorLeaf extends PlantAbility implements AddonAbility {
 	private double range;
 	
 	private Location center;
-	private int particles;
+	private int particles, uses = 0, maxUses;
 	private TempBlock source;
 	private Vector direction;
+	private boolean counted = true;
 
 	public RazorLeaf(Player player, boolean sourced) {
 		super(player);
@@ -47,10 +49,10 @@ public class RazorLeaf extends PlantAbility implements AddonAbility {
 			}
 			
 			this.source = new TempBlock(source, Material.AIR);
-			this.center = source.getLocation().clone().add(0.5, 0.5, 0.5);
+			this.center = source.getLocation().add(0.5, 0.5, 0.5);
 		} else {
 			this.source = null;
-			this.center = player.getEyeLocation().clone().add(player.getEyeLocation().getDirection().clone().normalize().multiply(1.5));
+			this.center = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.5));
 		}
 		
 		this.cooldown = ProjectAddons.instance.getConfig().getLong("Abilities.Water.RazorLeaf.Cooldown");
@@ -58,6 +60,7 @@ public class RazorLeaf extends PlantAbility implements AddonAbility {
 		this.radius = ProjectAddons.instance.getConfig().getDouble("Abilities.Water.RazorLeaf.Radius");
 		this.range = ProjectAddons.instance.getConfig().getDouble("Abilities.Water.RazorLeaf.Range");
 		this.particles = ProjectAddons.instance.getConfig().getInt("Abilities.Water.RazorLeaf.Particles");
+		this.maxUses = ProjectAddons.instance.getConfig().getInt("Abilities.Water.RazorLeaf.MaxRecalls");
 		
 		start();
 	}
@@ -79,17 +82,22 @@ public class RazorLeaf extends PlantAbility implements AddonAbility {
 			return;
 		}
 		
-		if (player.isSneaking()) {
-			Location holding = player.getEyeLocation().clone().add(player.getEyeLocation().getDirection().clone().normalize().multiply(1.5));
-			direction = GeneralMethods.getDirection(center, holding);
+		if (player.isSneaking() && uses < maxUses) {
+			counted = true;
+			direction = GeneralMethods.getDirection(center, player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(radius + 0.5)));
 		} else {
+			if (counted) {
+				counted = false;
+				++uses;
+			}
+			
 			Location target = null;
 			Entity e = GeneralMethods.getTargetedEntity(player, range);
 			
 			if (e == null || !(e instanceof LivingEntity)) {
-				target = GeneralMethods.getTargetedLocation(player, range);
+				target = GeneralMethods.getTargetedLocation(player, range).add(player.getEyeLocation().getDirection());
 			} else {
-				target = e.getLocation().clone().add(0, 1, 0);
+				target = e.getLocation().add(0, 1, 0);
 			}
 			
 			direction = GeneralMethods.getDirection(center, target);
@@ -106,22 +114,19 @@ public class RazorLeaf extends PlantAbility implements AddonAbility {
 			return;
 		}
 		
-		playPlantbendingSound(center);
+		if (Math.random() < 0.13) {
+			playPlantbendingSound(center);
+		}
 		
-		for (int n = 0; n < particles; n++) {
-			Location current, start = center.clone();
-			double c = 0.075;
+		for (int n = 0; n < particles; ++n) {
 			double phi = n * 137.5;
-			double r = c * Math.sqrt(n);
-			double x = r * Math.cos(Math.toRadians(phi));
-			double z = r * Math.sin(Math.toRadians(phi));
-			current = start.clone().add(x, 0, z);
+			double r = 0.075 * Math.sqrt(n);
 			
-			if (current.distance(start) > radius) {
+			if (r > radius) {
 				break;
 			}
 			
-			GeneralMethods.displayColoredParticle("3D9970", current);
+			GeneralMethods.displayColoredParticle(Util.LEAF_COLOR, center.clone().add(r * Math.cos(Math.toRadians(phi)), 0, r * Math.sin(Math.toRadians(phi))));
 		}
 		
 		for (Entity e : GeneralMethods.getEntitiesAroundPoint(center, radius + 1)) {

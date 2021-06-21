@@ -23,6 +23,7 @@ import com.projectkorra.projectkorra.util.TempBlock;
 
 import me.simplicitee.project.addons.ProjectAddons;
 import me.simplicitee.project.addons.util.HexColor;
+import me.simplicitee.project.addons.util.SoundEffect;
 
 public class CombustBeam extends CombustionAbility implements AddonAbility {
 
@@ -42,14 +43,18 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 	private double minPower;
 	@Attribute("MaxPower")
 	private double maxPower;
+	@Attribute("MaxDamage")
+	private double maxDamage;
+	@Attribute("MinDamage")
+	private double minDamage;
 	
-	private double power, rotation, angleCheck;
-	private double health;
+	private double power, rotation, angleCheck, damage, health;
 	private long chargeTime, revertTime;
 	private int counter;
 	private boolean charging, charged;
 	private Location curr;
 	private Vector direction;
+	private SoundEffect sound;
 	
 	private ParticleEffect[] flames = { ParticleEffect.FLAME, ParticleEffect.SOUL_FIRE_FLAME };
 	
@@ -67,6 +72,8 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 		this.maxAngle = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.CombustBeam.Maximum.Angle");
 		this.minPower = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.CombustBeam.Minimum.Power");
 		this.maxPower = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.CombustBeam.Maximum.Power");
+		this.minDamage = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.CombustBeam.Minimum.Damage");
+		this.maxDamage = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.CombustBeam.Maximum.Damage");
 		this.range = ProjectAddons.instance.getConfig().getDouble("Abilities.Fire.CombustBeam.Range");
 		this.revertTime = ProjectAddons.instance.getConfig().getLong("Abilities.Fire.CombustBeam.RevertTime");
 		this.health = player.getHealth();
@@ -74,6 +81,7 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 		this.charged = false;
 		this.rotation = 0;
 		this.counter = 0;
+		this.sound = new SoundEffect(Sound.ENTITY_WITHER_AMBIENT, 0.01f, 0.6f, 30);
 		
 		start();
 	}
@@ -106,12 +114,13 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 				return;
 			}
 
-			player.getWorld().playSound(player.getEyeLocation(), Sound.ENTITY_WITHER_AMBIENT, 0.01f, 0.6f);
+			sound.play(player.getEyeLocation());
 			
 			if (getStartTime() + maxChargeTime <= System.currentTimeMillis()) {
 				this.chargeTime = maxChargeTime;
 				this.angleCheck = minAngle;
 				this.power = maxPower;
+				this.damage = maxDamage;
 				this.charged = true;
 				GeneralMethods.displayColoredParticle("ff2424", player.getEyeLocation().add(player.getEyeLocation().getDirection().normalize()), 1, 0.4, 0.4, 0.4);
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 10, 5));
@@ -124,6 +133,7 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 				
 				this.angleCheck = maxAngle - (maxAngle - minAngle) * percent;
 				this.power = minPower + (maxPower - minPower) * percent;
+				this.damage = minDamage + (maxDamage - minDamage) * percent;
 				this.charged = true;
 				
 				ActionBar.sendActionBar(ChatColor.RED + (Math.round(percent * 100) + "%"), player);
@@ -137,7 +147,7 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 				Vector to = player.getEyeLocation().getDirection().clone().normalize().multiply(0.3);
 				
 				if (Math.abs(direction.angle(to)) < angleCheck) {
-					direction.add(to);
+					direction.add(to.multiply(1.0 / 20));
 				}
 			}
 			
@@ -183,7 +193,7 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 				
 				rotation += 10;
 				
-				if (counter % 6 == 0) {
+				if (counter % 10 == 0) {
 					ParticleEffect.EXPLOSION_LARGE.display(curr, 1);
 					playCombustionSound(curr);
 				}
@@ -217,6 +227,7 @@ public class CombustBeam extends CombustionAbility implements AddonAbility {
 			for (Entity e : GeneralMethods.getEntitiesAroundPoint(curr, power)) {
 				if (e instanceof LivingEntity) {
 					double knockback = power / (0.3 + e.getLocation().distance(curr));
+					DamageHandler.damageEntity(e, damage, this);
 					e.setVelocity(GeneralMethods.getDirection(curr, e.getLocation().add(0, 1, 0)).normalize().multiply(knockback));
 				}
 			}
